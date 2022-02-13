@@ -9,8 +9,9 @@ function App() {
 
 	useEffect(() => {
 		const obtenerLS = () => {
-			localStorage.getItem('pacientes') ?? [];
-			setPacientes(listadoLocalStorage);
+			const pacientesLS =
+				JSON.parse(localStorage.getItem('pacientes')) ?? [];
+			setPacientes(pacientesLS);
 		};
 		obtenerLS();
 	}, []);
