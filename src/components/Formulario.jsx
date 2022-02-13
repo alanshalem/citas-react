@@ -1,13 +1,31 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Error from './Error';
 
-const Formulario = ({ pacientes, setPacientes }) => {
+const Formulario = ({ pacientes, setPacientes, paciente, setPaciente }) => {
 	const [nombre, setNombre] = useState('');
 	const [propietario, setPropietario] = useState('');
 	const [email, setEmail] = useState('');
 	const [fecha, setFecha] = useState('');
 	const [sintomas, setSintomas] = useState('');
+
 	const [error, setError] = useState(false);
+
+	useEffect(() => {
+		if (Object.keys(paciente).length > 0) {
+			setNombre(paciente.nombre);
+			setPropietario(paciente.propietario);
+			setEmail(paciente.email);
+			setFecha(paciente.fecha);
+			setSintomas(paciente.sintomas);
+		}
+	}, [paciente]);
+
+	const generarId = () => {
+		const random = Math.random().toString(36).substr(2);
+		const fecha = Date.now().toString(36);
+
+		return random + fecha;
+	};
 
 	const handleSubmit = (e) => {
 		e.preventDefault();
@@ -40,9 +58,33 @@ const Formulario = ({ pacientes, setPacientes }) => {
 			email,
 			fecha,
 			sintomas,
+			id: generarId(),
 		};
-		//Agregamos el paciente al state
-		setPacientes((pacientes) => [...pacientes, objetoPaciente]);
+
+		if (paciente.id) {
+			//Actualizar paciente
+			objetoPaciente.id = paciente.id;
+			console.log(objetoPaciente); // Va a ser el actualizado, este me interesa agregarlo al array
+			console.log(pacientes); // Va a ser el que yo presione, la version anterior
+			const pacientesActualizados = pacientes.map((pacienteState) =>
+				pacienteState.id === paciente.id
+					? objetoPaciente
+					: pacienteState
+			);
+			setPacientes(pacientesActualizados);
+			setPaciente({});
+		} else {
+			//Agregamos el paciente al state
+			objetoPaciente.id = generarId();
+			setPacientes([...pacientes, objetoPaciente]);
+		}
+
+		//Reiniciamos el formulario
+		setNombre('');
+		setPropietario('');
+		setEmail('');
+		setFecha('');
+		setSintomas('');
 	};
 	return (
 		<div className="md:w-1/2 lg:w-2/5 mx-5">
@@ -139,7 +181,7 @@ const Formulario = ({ pacientes, setPacientes }) => {
 				</div>
 				<input
 					type="submit"
-					value="Añadir Paciente"
+					value={paciente.id ? 'Editar Paciente' : 'Agregar Paciente'}
 					className="bg-indigo-600 w-full p-3 text-white uppercase font-bold rounded-md hover:bg-indigo-700 cursor-pointer transition-colors"
 				/>
 			</form>
